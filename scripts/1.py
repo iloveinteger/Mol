@@ -18,7 +18,7 @@ class Mole(QtWidgets.QMainWindow):
     def setupUi(self):
         centralWidget = QtWidgets.QWidget(self)
         self.setCentralWidget(centralWidget)
-        flags = QtCore.Qt.WindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint if self.on_top else QtCore.Qt.FramelessWindowHint)
+        flags = QtCore.Qt.WindowFlags(QtCore.Qt.FramelessWindowHint |QtCore.Qt.Tool| QtCore.Qt.WindowStaysOnTopHint if self.on_top else QtCore.Qt.FramelessWindowHint)
         self.setWindowFlags(flags)
         self.setAttribute(QtCore.Qt.WA_NoSystemBackground, True)
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground, True)
