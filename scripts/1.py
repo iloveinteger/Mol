@@ -33,8 +33,11 @@ class Mole(QtWidgets.QMainWindow):
         movie.start()
         self.setGeometry(self.xy[0], self.xy[1], w, h)
 
-    def mouseDoubleClickEvent(self,e):
-        QtWidgets.qApp.quit()
+    def mouseMoveEvent(self, e):
+        return [e.globalX(), e.globalY()]
+    
+    def mousePressEvent(self,e):
+        self.moveto(self.mouseMoveEvent())
     
     def keyPressEvent(self, e):
         if e.key()==32:
