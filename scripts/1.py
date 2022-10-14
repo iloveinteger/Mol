@@ -44,10 +44,16 @@ class Mole(QtWidgets.QMainWindow):
             toxy = [randint(0,1700),randint(0,700)]
             m.moveto(self.xy,toxy,1.5)
 
-    def moveto(self, from_xy, to_xy, v):
-        self.v = v
-        self.vx = int((to_xy[0]-from_xy[0])/(100*t))
-        self.vy = int((to_xy[1]-from_xy[1])/(100*t))
+    def moveto(self, from_xy, to_xy, a, maxspeed):
+        self.v = 0
+        self.a = a
+        self.ms = maxspeed
+        
+        xd = to_xy[0]-from_xy[0]
+        yd = to_xy[1]-from_xy[1]
+        self.slope = yd/xd
+        self.direction = xd
+        
         self.timer = QtCore.QTimer(self)
         self.timer.setInterval(10)
         self.timer.timeout.connect(self.movemove)
@@ -55,10 +61,12 @@ class Mole(QtWidgets.QMainWindow):
         self.timer.start()
     
     def movemove(self):
-        self.t -= 0.01
-        if self.t<=0:
-            self.timer.stop()
-            self.changetomole()
+        self.v += self.a
+        if self.v>=self.ms:
+            self.v = self.ms
+
+        #self.timer.stop()
+        #self.changetomole()
         self.xy[0] += self.vx
         self.xy[1] += self.vy
         self.move(*self.xy)
