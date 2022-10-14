@@ -37,15 +37,15 @@ class Mole(QtWidgets.QMainWindow):
         return [e.globalX(), e.globalY()]
     
     def mousePressEvent(self,e):
-        self.moveto(self.mouseMoveEvent())
+        self.moveto(self.xy,self.mouseMoveEvent(),1.5)
     
     def keyPressEvent(self, e):
         if e.key()==32:
             toxy = [randint(0,1700),randint(0,700)]
             m.moveto(self.xy,toxy,1.5)
 
-    def moveto(self, from_xy, to_xy, t):
-        self.t = t
+    def moveto(self, from_xy, to_xy, v):
+        self.v = v
         self.vx = int((to_xy[0]-from_xy[0])/(100*t))
         self.vy = int((to_xy[1]-from_xy[1])/(100*t))
         self.timer = QtCore.QTimer(self)
