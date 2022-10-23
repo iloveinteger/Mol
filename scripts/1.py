@@ -1,19 +1,36 @@
 import sys
 import os
+import mouse
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtGui import QMovie
 from random import randint
+from time import sleep
+
+class loopp(QtCore.QThread):
+    domove = QtCore.pyqtSignal(list)
+
+    def run(self):
+        global stat
+        while True:
+            if mouse.is_pressed("right") and stat == 'm':
+                to_xy = list(mouse.get_position())
+                print(to_xy)
+                self.domove.emit(to_xy)
+                sleep(0.1)
 
 class Mole(QtWidgets.QMainWindow):
     def __init__(self, xy, size=0.2, on_top=False):
         super(Mole, self).__init__()
-        self.timer = QtCore.QTimer(self)
+        global stat
+        stat = 'm'
+        self.loopp = loopp()
+        self.loopp.start()
+        self.loopp.domove.connect(lambda x : self.moveto(self.xy,x,1))
         self.img_path = ".\\..\\images\\mole.gif"
         self.xy = xy
         self.size = size
         self.on_top = on_top
         self.setupUi()
-        self.show()
 
     def setupUi(self):
         centralWidget = QtWidgets.QWidget(self)
@@ -33,19 +50,10 @@ class Mole(QtWidgets.QMainWindow):
         movie.start()
         self.setGeometry(self.xy[0], self.xy[1], w, h)
 
-    def mouseMoveEvent(self, e):
-        return [e.globalX(), e.globalY()]
-    
-    def mousePressEvent(self,e):
-        self.moveto(self.xy,self.mouseMoveEvent(),1.5)
-    
-    def keyPressEvent(self, e):
-        if e.key()==32:
-            toxy = [randint(0,1700),randint(0,700)]
-            m.moveto(self.xy,toxy,1.5)
-
-    def moveto(self, from_xy, to_xy, v):
-        self.v = v
+    def moveto(self, from_xy, to_xy, t):
+        global stat
+        stat = 'h'
+        self.t = t
         self.vx = int((to_xy[0]-from_xy[0])/(100*t))
         self.vy = int((to_xy[1]-from_xy[1])/(100*t))
         self.timer = QtCore.QTimer(self)
@@ -53,12 +61,14 @@ class Mole(QtWidgets.QMainWindow):
         self.timer.timeout.connect(self.movemove)
         self.changetohole()
         self.timer.start()
-    
+
     def movemove(self):
         self.t -= 0.01
         if self.t<=0:
             self.timer.stop()
             self.changetomole()
+            global stat
+            stat = 'm'
         self.xy[0] += self.vx
         self.xy[1] += self.vy
         self.move(*self.xy)
@@ -78,4 +88,5 @@ if __name__ == '__main__':
     os.chdir(directory)
     app = QtWidgets.QApplication(sys.argv)
     m = Mole(xy=[randint(0,1700),randint(0,700)], on_top=True)
+    m.show()
     sys.exit(app.exec_())
