@@ -50,12 +50,17 @@ class Mole(QtWidgets.QMainWindow):
         movie.start()
         self.setGeometry(self.xy[0], self.xy[1], w, h)
 
+    def keyPressEvent(self, e) :
+        if (e.key() == QtCore.Qt.Key_Escape):
+            self.close()
+            QtCore.QCoreApplication.instance().quit()
+        
     def moveto(self, from_xy, to_xy, t):
         global stat
         stat = 'h'
         self.t = t
         self.vx = int((to_xy[0]-from_xy[0])/(100*t))
-        self.vy = int((to_xy[1]-from_xy[1])/(100*t))
+        self.vy = int((to_xy[1]-150-from_xy[1])/(100*t))
         self.timer = QtCore.QTimer(self)
         self.timer.setInterval(10)
         self.timer.timeout.connect(self.movemove)
