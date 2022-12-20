@@ -11,15 +11,28 @@ class loopp(QtCore.QThread):
 
     def run(self):
         global stat
+        timer = 100000
         while True:
-            if mouse.is_pressed("right") and stat == 'm':
+            if mouse.is_pressed("left") and stat == 'm':
                 to_xy = list(mouse.get_position())
+                to_xy[0] += -150
+                to_xy[1] += -120
                 print(to_xy)
                 self.domove.emit(to_xy)
-                sleep(0.1)
+                sleep(0.3)
+            else:
+                if timer<0:
+                    sleep(0.1)
+                    to_xy = [0,0]
+                    to_xy[0] = randint(100,1000)
+                    to_xy[1] = randint(100,700)
+                    print(to_xy)
+                    self.domove.emit(to_xy)
+                    timer = randint(100000000,1000000000)
+                timer -= 1
 
 class Mole(QtWidgets.QMainWindow):
-    def __init__(self, xy, size=0.2, on_top=False):
+    def __init__(self, xy, size=1, on_top=False):
         super(Mole, self).__init__()
         global stat
         stat = 'm'
@@ -54,11 +67,14 @@ class Mole(QtWidgets.QMainWindow):
         global stat
         stat = 'h'
         self.t = t
-        self.vx = int((to_xy[0]-from_xy[0])/(100*t))
-        self.vy = int((to_xy[1]-from_xy[1])/(100*t))
+        self.vx = (to_xy[0]-from_xy[0])//(100*t)
+        self.vy = (to_xy[1]-from_xy[1])//(100*t)
+        self.lx = (to_xy[0]-from_xy[0])%(100*t)
+        self.ly = (to_xy[1]-from_xy[1])%(100*t)
         self.timer = QtCore.QTimer(self)
         self.timer.setInterval(10)
         self.timer.timeout.connect(self.movemove)
+        self.move(*self.xy)
         self.changetohole()
         self.timer.start()
 
@@ -66,23 +82,54 @@ class Mole(QtWidgets.QMainWindow):
         self.t -= 0.01
         if self.t<=0:
             self.timer.stop()
+            self.xy[0] += self.lx
+            self.xy[1] += self.ly
             self.changetomole()
             global stat
             stat = 'm'
         self.xy[0] += self.vx
         self.xy[1] += self.vy
         self.move(*self.xy)
-
+    
     def changetohole(self):
-        self.img_path = ".\\..\\images\\hole.gif"
-        self.setupUi()
-        self.show()
+        self.img_path = ".\\..\\images\\mol_down.gif"
+        movie = QMovie(self.img_path)
+        self.label.setMovie(movie)
+        movie.start()
+        movie.stop()
+        w = int(movie.frameRect().size().width() * self.size)
+        h = int(movie.frameRect().size().height() * self.size)
+        movie.setScaledSize(QtCore.QSize(w, h))
+        movie.start()
     
     def changetomole(self):
-        self.img_path = ".\\..\\images\\mole.gif"
-        self.setupUi()
-        self.show()
+        self.img_path = ".\\..\\images\\mol_up.gif"
+        movie = QMovie(self.img_path)
+        self.label.setMovie(movie)
+        movie.start()
+        movie.stop()
+        w = int(movie.frameRect().size().width() * self.size)
+        h = int(movie.frameRect().size().height() * self.size)
+        movie.setScaledSize(QtCore.QSize(w, h))
+        movie.start()
+        movie.finished.connect(self.mol_idle)
 
+    def mol_idle(self):
+        self.img_path = ".\\..\\images\\mole.gif"
+        movie = QMovie(self.img_path)
+        self.label.setMovie(movie)
+        movie.start()
+        movie.stop()
+        w = int(movie.frameRect().size().width() * self.size)
+        h = int(movie.frameRect().size().height() * self.size)
+        movie.setScaledSize(QtCore.QSize(w, h))
+        movie.start()
+
+    def keyPressEvent(self, e):
+        key = e.key()
+        if key == QtCore.Qt.Key.Key_Escape:
+            quit()
+        
 if __name__ == '__main__':
     directory = os.path.dirname(os.path.abspath(__file__))
     os.chdir(directory)
